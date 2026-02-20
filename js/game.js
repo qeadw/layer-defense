@@ -14,8 +14,6 @@ class Game {
         this.enemies = [];
         this.lives = 20;
         this.wave = 1;
-        this.enemiesSpawned = 0;
-        this.waveInProgress = false;
         this.lastTime = 0;
         this.spawnTimer = 0;
 
@@ -23,12 +21,14 @@ class Game {
         this.livesDisplay = document.getElementById('lives');
         this.waveDisplay = document.getElementById('wave-num');
         this.nextWaveBtn = document.getElementById('next-wave-btn');
+        this.prevWaveBtn = document.getElementById('prev-wave-btn');
 
-        // Button event
-        this.nextWaveBtn.addEventListener('click', () => this.startWave());
+        // Button events - always available
+        this.nextWaveBtn.addEventListener('click', () => this.changeWave(1));
+        this.prevWaveBtn.addEventListener('click', () => this.changeWave(-1));
 
-        // Start first wave automatically
-        this.startWave();
+        // Update button states
+        this.updateWaveButtons();
 
         // Start game loop
         this.gameLoop = this.gameLoop.bind(this);
@@ -49,9 +49,20 @@ class Game {
         }
     }
 
+    changeWave(delta) {
+        this.wave = Math.max(1, this.wave + delta);
+        this.updateUI();
+        this.updateWaveButtons();
+    }
+
+    updateWaveButtons() {
+        this.prevWaveBtn.disabled = this.wave <= 1;
+    }
+
     getEnemyTypeForWave(wave) {
         // Each wave introduces enemies up to that wave number
         // Wave 1: only Red, Wave 2: Red + Blue, etc.
+        // Waves beyond ENEMY_TYPES.length still use all types
         const maxTypeIndex = Math.min(wave, ENEMY_TYPES.length) - 1;
 
         // Randomly pick from available types, weighted toward newer types
@@ -74,41 +85,18 @@ class Game {
         return ENEMY_TYPES[maxTypeIndex];
     }
 
-    startWave() {
-        if (this.waveInProgress) return;
-
-        this.waveInProgress = true;
-        this.enemiesSpawned = 0;
-        this.nextWaveBtn.disabled = true;
-        this.nextWaveBtn.textContent = `Wave ${this.wave} in progress...`;
-    }
-
     spawnEnemy() {
         const enemyType = this.getEnemyTypeForWave(this.wave);
         const enemy = new Enemy(this.track, enemyType);
         this.enemies.push(enemy);
-        this.enemiesSpawned++;
     }
 
     update(deltaTime) {
-        // Spawn enemies during wave
-        if (this.waveInProgress && this.enemiesSpawned < CONFIG.ENEMIES_PER_WAVE) {
-            this.spawnTimer += deltaTime * 1000;
-            if (this.spawnTimer >= CONFIG.SPAWN_INTERVAL) {
-                this.spawnEnemy();
-                this.spawnTimer = 0;
-            }
-        }
-
-        // Check if wave is complete
-        if (this.waveInProgress &&
-            this.enemiesSpawned >= CONFIG.ENEMIES_PER_WAVE &&
-            this.enemies.length === 0) {
-            this.waveInProgress = false;
-            this.wave++;
-            this.updateUI();
-            this.nextWaveBtn.disabled = false;
-            this.nextWaveBtn.textContent = `Start Wave ${this.wave}`;
+        // Constantly spawn enemies
+        this.spawnTimer += deltaTime * 1000;
+        if (this.spawnTimer >= CONFIG.SPAWN_INTERVAL) {
+            this.spawnEnemy();
+            this.spawnTimer = 0;
         }
 
         // Update enemies

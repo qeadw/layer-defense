@@ -52,10 +52,15 @@ html, body {
     color: #4ecdc4;
 }
 
-#next-wave-btn {
+#wave-controls {
+    display: flex;
+    gap: 10px;
     margin-top: 10px;
+}
+
+#prev-wave-btn, #next-wave-btn {
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 18px;
     background: #4ecdc4;
     color: #000;
     border: none;
@@ -65,10 +70,15 @@ html, body {
     transition: background 0.2s;
 }
 
-#next-wave-btn:hover {
+#prev-wave-btn:hover, #next-wave-btn:hover {
     background: #3dbdb5;
 }
 
-#next-wave-btn:active {
+#prev-wave-btn:active, #next-wave-btn:active {
     background: #2dada5;
+}
+
+#prev-wave-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
 }
