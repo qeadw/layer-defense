@@ -51,3 +51,24 @@ html, body {
 #wave-num {
     color: #4ecdc4;
 }
+
+#next-wave-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #4ecdc4;
+    color: #000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+#next-wave-btn:hover {
+    background: #3dbdb5;
+}
+
+#next-wave-btn:active {
+    background: #2dada5;
+}

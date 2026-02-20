@@ -14,12 +14,21 @@ class Game {
         this.enemies = [];
         this.lives = 20;
         this.wave = 1;
+        this.enemiesSpawned = 0;
+        this.waveInProgress = false;
         this.lastTime = 0;
         this.spawnTimer = 0;
 
         // UI elements
         this.livesDisplay = document.getElementById('lives');
         this.waveDisplay = document.getElementById('wave-num');
+        this.nextWaveBtn = document.getElementById('next-wave-btn');
+
+        // Button event
+        this.nextWaveBtn.addEventListener('click', () => this.startWave());
+
+        // Start first wave automatically
+        this.startWave();
 
         // Start game loop
         this.gameLoop = this.gameLoop.bind(this);
@@ -40,19 +49,66 @@ class Game {
         }
     }
 
+    getEnemyTypeForWave(wave) {
+        // Each wave introduces enemies up to that wave number
+        // Wave 1: only Red, Wave 2: Red + Blue, etc.
+        const maxTypeIndex = Math.min(wave, ENEMY_TYPES.length) - 1;
+
+        // Randomly pick from available types, weighted toward newer types
+        const weights = [];
+        for (let i = 0; i <= maxTypeIndex; i++) {
+            // Newer types have higher weight
+            weights.push(i + 1);
+        }
+
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        let random = Math.random() * totalWeight;
+
+        for (let i = 0; i <= maxTypeIndex; i++) {
+            random -= weights[i];
+            if (random <= 0) {
+                return ENEMY_TYPES[i];
+            }
+        }
+
+        return ENEMY_TYPES[maxTypeIndex];
+    }
+
+    startWave() {
+        if (this.waveInProgress) return;
+
+        this.waveInProgress = true;
+        this.enemiesSpawned = 0;
+        this.nextWaveBtn.disabled = true;
+        this.nextWaveBtn.textContent = `Wave ${this.wave} in progress...`;
+    }
+
     spawnEnemy() {
-        // Layers based on wave (1-3 layers for early waves)
-        const layers = Math.min(1 + Math.floor(this.wave / 3), 10);
-        const enemy = new Enemy(this.track, layers);
+        const enemyType = this.getEnemyTypeForWave(this.wave);
+        const enemy = new Enemy(this.track, enemyType);
         this.enemies.push(enemy);
+        this.enemiesSpawned++;
     }
 
     update(deltaTime) {
-        // Spawn enemies
-        this.spawnTimer += deltaTime * 1000;
-        if (this.spawnTimer >= CONFIG.SPAWN_INTERVAL) {
-            this.spawnEnemy();
-            this.spawnTimer = 0;
+        // Spawn enemies during wave
+        if (this.waveInProgress && this.enemiesSpawned < CONFIG.ENEMIES_PER_WAVE) {
+            this.spawnTimer += deltaTime * 1000;
+            if (this.spawnTimer >= CONFIG.SPAWN_INTERVAL) {
+                this.spawnEnemy();
+                this.spawnTimer = 0;
+            }
+        }
+
+        // Check if wave is complete
+        if (this.waveInProgress &&
+            this.enemiesSpawned >= CONFIG.ENEMIES_PER_WAVE &&
+            this.enemies.length === 0) {
+            this.waveInProgress = false;
+            this.wave++;
+            this.updateUI();
+            this.nextWaveBtn.disabled = false;
+            this.nextWaveBtn.textContent = `Start Wave ${this.wave}`;
         }
 
         // Update enemies
@@ -73,7 +129,6 @@ class Game {
         if (this.lives <= 0) {
             this.lives = 0;
             this.updateUI();
-            // For now just keep running, can add game over screen later
         }
     }
 
@@ -88,6 +143,44 @@ class Game {
         // Draw enemies
         for (const enemy of this.enemies) {
             enemy.draw(this.ctx);
+        }
+
+        // Draw wave enemy preview
+        this.drawWavePreview();
+    }
+
+    drawWavePreview() {
+        const maxTypeIndex = Math.min(this.wave, ENEMY_TYPES.length) - 1;
+        const previewX = this.canvas.width - 150;
+        const previewY = 20;
+
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        this.ctx.fillRect(previewX - 10, previewY - 10, 140, 30 + (maxTypeIndex + 1) * 25);
+
+        this.ctx.fillStyle = '#fff';
+        this.ctx.font = '14px Arial';
+        this.ctx.fillText('Available Enemies:', previewX, previewY + 10);
+
+        for (let i = 0; i <= maxTypeIndex; i++) {
+            const type = ENEMY_TYPES[i];
+            const y = previewY + 30 + i * 25;
+
+            // Draw mini preview
+            if (type.colors) {
+                // Combo - draw striped mini square
+                const stripeWidth = 15 / type.colors.length;
+                for (let j = 0; j < type.colors.length; j++) {
+                    this.ctx.fillStyle = type.colors[j];
+                    this.ctx.fillRect(previewX + j * stripeWidth, y, stripeWidth, 15);
+                }
+            } else {
+                // Solid
+                this.ctx.fillStyle = type.color;
+                this.ctx.fillRect(previewX, y, 15, 15);
+            }
+
+            this.ctx.fillStyle = '#fff';
+            this.ctx.fillText(`${type.name} (${type.layers}HP)`, previewX + 22, y + 12);
         }
     }
 
