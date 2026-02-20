@@ -1,23 +1,31 @@
 // Track system - defines the path enemies follow
 
 class Track {
-    constructor() {
-        // Define waypoints for the track path
-        // Enemies will move from point to point
-        this.waypoints = [
-            { x: -30, y: 100 },      // Start off-screen left
-            { x: 150, y: 100 },
-            { x: 150, y: 250 },
-            { x: 400, y: 250 },
-            { x: 400, y: 100 },
-            { x: 600, y: 100 },
-            { x: 600, y: 400 },
-            { x: 300, y: 400 },
-            { x: 300, y: 500 },
-            { x: 750, y: 500 },
-            { x: 750, y: 300 },
-            { x: 930, y: 300 },      // End off-screen right
+    constructor(canvasWidth, canvasHeight) {
+        this.width = canvasWidth;
+        this.height = canvasHeight;
+
+        // Define waypoints as percentages, then scale to screen size
+        const waypointsPercent = [
+            { x: -0.03, y: 0.17 },     // Start off-screen left
+            { x: 0.17, y: 0.17 },
+            { x: 0.17, y: 0.42 },
+            { x: 0.44, y: 0.42 },
+            { x: 0.44, y: 0.17 },
+            { x: 0.67, y: 0.17 },
+            { x: 0.67, y: 0.67 },
+            { x: 0.33, y: 0.67 },
+            { x: 0.33, y: 0.83 },
+            { x: 0.83, y: 0.83 },
+            { x: 0.83, y: 0.50 },
+            { x: 1.03, y: 0.50 },      // End off-screen right
         ];
+
+        // Scale waypoints to actual screen size
+        this.waypoints = waypointsPercent.map(p => ({
+            x: p.x * canvasWidth,
+            y: p.y * canvasHeight
+        }));
 
         // Calculate total track length
         this.totalLength = this.calculateTotalLength();

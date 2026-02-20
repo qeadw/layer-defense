@@ -1,8 +1,5 @@
 // Game configuration
 const CONFIG = {
-    CANVAS_WIDTH: 900,
-    CANVAS_HEIGHT: 600,
-
     // Enemy settings
     ENEMY_SIZE: 30,
     BASE_ENEMY_TRAVEL_TIME: 45, // seconds to cross map

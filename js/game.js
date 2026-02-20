@@ -5,12 +5,12 @@ class Game {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
 
-        // Set canvas size
-        this.canvas.width = CONFIG.CANVAS_WIDTH;
-        this.canvas.height = CONFIG.CANVAS_HEIGHT;
+        // Set canvas size to fullscreen
+        this.resizeCanvas();
+        window.addEventListener('resize', () => this.resizeCanvas());
 
         // Game state
-        this.track = new Track();
+        this.track = new Track(this.canvas.width, this.canvas.height);
         this.enemies = [];
         this.lives = 20;
         this.wave = 1;
@@ -24,6 +24,20 @@ class Game {
         // Start game loop
         this.gameLoop = this.gameLoop.bind(this);
         requestAnimationFrame(this.gameLoop);
+    }
+
+    resizeCanvas() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+
+        // Rebuild track for new size
+        if (this.track) {
+            this.track = new Track(this.canvas.width, this.canvas.height);
+            // Update existing enemies with new track
+            for (const enemy of this.enemies) {
+                enemy.track = this.track;
+            }
+        }
     }
 
     spawnEnemy() {
