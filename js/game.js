@@ -15,7 +15,11 @@ class Game {
         this.lives = 20;
         this.wave = 1;
         this.lastTime = 0;
-        this.spawnTimer = 0;
+
+        // Spawn timers for each enemy type (independent)
+        this.spawnTimers = {};
+        this.baseSpawnInterval = 2000; // 2 seconds for red
+        this.spawnSlowdown = 1.15; // 15% slower for each subsequent color
 
         // UI elements
         this.livesDisplay = document.getElementById('lives');
@@ -59,44 +63,40 @@ class Game {
         this.prevWaveBtn.disabled = this.wave <= 1;
     }
 
-    getEnemyTypeForWave(wave) {
-        // Each wave introduces enemies up to that wave number
-        // Wave 1: only Red, Wave 2: Red + Blue, etc.
-        // Waves beyond ENEMY_TYPES.length still use all types
-        const maxTypeIndex = Math.min(wave, ENEMY_TYPES.length) - 1;
-
-        // Randomly pick from available types, weighted toward newer types
-        const weights = [];
-        for (let i = 0; i <= maxTypeIndex; i++) {
-            // Newer types have higher weight
-            weights.push(i + 1);
-        }
-
-        const totalWeight = weights.reduce((a, b) => a + b, 0);
-        let random = Math.random() * totalWeight;
-
-        for (let i = 0; i <= maxTypeIndex; i++) {
-            random -= weights[i];
-            if (random <= 0) {
-                return ENEMY_TYPES[i];
-            }
-        }
-
-        return ENEMY_TYPES[maxTypeIndex];
+    // Get how many enemy types are unlocked at current wave
+    // New type every 2 waves
+    getUnlockedTypeCount() {
+        return Math.min(Math.ceil(this.wave / 2), ENEMY_TYPES.length);
     }
 
-    spawnEnemy() {
-        const enemyType = this.getEnemyTypeForWave(this.wave);
+    // Get spawn interval for a specific enemy type index
+    getSpawnInterval(typeIndex) {
+        return this.baseSpawnInterval * Math.pow(this.spawnSlowdown, typeIndex);
+    }
+
+    spawnEnemy(typeIndex) {
+        const enemyType = ENEMY_TYPES[typeIndex];
         const enemy = new Enemy(this.track, enemyType);
         this.enemies.push(enemy);
     }
 
     update(deltaTime) {
-        // Constantly spawn enemies
-        this.spawnTimer += deltaTime * 1000;
-        if (this.spawnTimer >= CONFIG.SPAWN_INTERVAL) {
-            this.spawnEnemy();
-            this.spawnTimer = 0;
+        const unlockedCount = this.getUnlockedTypeCount();
+
+        // Update spawn timers for each unlocked enemy type
+        for (let i = 0; i < unlockedCount; i++) {
+            // Initialize timer if needed
+            if (this.spawnTimers[i] === undefined) {
+                this.spawnTimers[i] = 0;
+            }
+
+            this.spawnTimers[i] += deltaTime * 1000;
+            const interval = this.getSpawnInterval(i);
+
+            if (this.spawnTimers[i] >= interval) {
+                this.spawnEnemy(i);
+                this.spawnTimers[i] = 0;
+            }
         }
 
         // Update enemies
@@ -138,19 +138,20 @@ class Game {
     }
 
     drawWavePreview() {
-        const maxTypeIndex = Math.min(this.wave, ENEMY_TYPES.length) - 1;
-        const previewX = this.canvas.width - 150;
+        const unlockedCount = this.getUnlockedTypeCount();
+        const previewX = this.canvas.width - 180;
         const previewY = 20;
 
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.fillRect(previewX - 10, previewY - 10, 140, 30 + (maxTypeIndex + 1) * 25);
+        this.ctx.fillRect(previewX - 10, previewY - 10, 170, 30 + unlockedCount * 25);
 
         this.ctx.fillStyle = '#fff';
         this.ctx.font = '14px Arial';
-        this.ctx.fillText('Available Enemies:', previewX, previewY + 10);
+        this.ctx.fillText('Active Enemies:', previewX, previewY + 10);
 
-        for (let i = 0; i <= maxTypeIndex; i++) {
+        for (let i = 0; i < unlockedCount; i++) {
             const type = ENEMY_TYPES[i];
+            const interval = this.getSpawnInterval(i);
             const y = previewY + 30 + i * 25;
 
             // Draw mini preview
@@ -168,7 +169,7 @@ class Game {
             }
 
             this.ctx.fillStyle = '#fff';
-            this.ctx.fillText(`${type.name} (${type.layers}HP)`, previewX + 22, y + 12);
+            this.ctx.fillText(`${type.name} (${(interval/1000).toFixed(1)}s)`, previewX + 22, y + 12);
         }
     }
 
