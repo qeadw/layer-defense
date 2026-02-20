@@ -17,28 +17,42 @@ const SOLID_COLORS = [
     { name: 'Red', color: '#ff0000', layers: 1 },
     { name: 'Blue', color: '#0066ff', layers: 1 },
     { name: 'Green', color: '#00cc00', layers: 1 },
-    { name: 'Yellow', color: '#ffcc00', layers: 2 },
-    { name: 'Cyan', color: '#00cccc', layers: 2 },
-    { name: 'Magenta', color: '#cc00cc', layers: 2 },
-    { name: 'Orange', color: '#ff6600', layers: 3 },
-    { name: 'Purple', color: '#6600cc', layers: 3 },
-    { name: 'Pink', color: '#ff66aa', layers: 3 },
-    { name: 'White', color: '#ffffff', layers: 4 },
+    { name: 'Yellow', color: '#ffcc00', layers: 1 },
+    { name: 'Cyan', color: '#00cccc', layers: 1 },
+    { name: 'Magenta', color: '#cc00cc', layers: 1 },
+    { name: 'Orange', color: '#ff6600', layers: 1 },
+    { name: 'Purple', color: '#6600cc', layers: 1 },
+    { name: 'Pink', color: '#ff66aa', layers: 1 },
+    { name: 'White', color: '#ffffff', layers: 1 },
 ];
 
-// 10 Combo colors (striped patterns showing strength)
-const COMBO_COLORS = [
-    { name: 'Red/Blue', colors: ['#ff0000', '#0066ff'], layers: 4 },
-    { name: 'Red/Green', colors: ['#ff0000', '#00cc00'], layers: 4 },
-    { name: 'Blue/Red', colors: ['#0066ff', '#ff0000'], layers: 5 },
-    { name: 'Blue/Blue', colors: ['#0066ff', '#003399'], layers: 5 },  // Striped dark blue
-    { name: 'Blue/Green', colors: ['#0066ff', '#00cc00'], layers: 5 },
-    { name: 'Green/Red', colors: ['#00cc00', '#ff0000'], layers: 6 },
-    { name: 'Green/Blue', colors: ['#00cc00', '#0066ff'], layers: 6 },
-    { name: 'Green/Green', colors: ['#00cc00', '#006600'], layers: 6 }, // Striped dark green
-    { name: 'Yellow/Cyan', colors: ['#ffcc00', '#00cccc'], layers: 7 },
-    { name: 'Rainbow', colors: ['#ff0000', '#ff6600', '#ffcc00', '#00cc00', '#0066ff', '#6600cc'], layers: 10 },
+// 10 Red/XXX combos (striped)
+const RED_COMBOS = [
+    { name: 'Red/Red', colors: ['#ff0000', '#aa0000'], layers: 2 },      // Light/dark red
+    { name: 'Red/Blue', colors: ['#ff0000', '#0066ff'], layers: 2 },
+    { name: 'Red/Green', colors: ['#ff0000', '#00cc00'], layers: 2 },
+    { name: 'Red/Yellow', colors: ['#ff0000', '#ffcc00'], layers: 2 },
+    { name: 'Red/Cyan', colors: ['#ff0000', '#00cccc'], layers: 2 },
+    { name: 'Red/Magenta', colors: ['#ff0000', '#cc00cc'], layers: 2 },
+    { name: 'Red/Orange', colors: ['#ff0000', '#ff6600'], layers: 2 },
+    { name: 'Red/Purple', colors: ['#ff0000', '#6600cc'], layers: 2 },
+    { name: 'Red/Pink', colors: ['#ff0000', '#ff66aa'], layers: 2 },
+    { name: 'Red/White', colors: ['#ff0000', '#ffffff'], layers: 2 },
+];
+
+// 10 Blue/XXX combos (striped)
+const BLUE_COMBOS = [
+    { name: 'Blue/Red', colors: ['#0066ff', '#ff0000'], layers: 3 },
+    { name: 'Blue/Blue', colors: ['#0066ff', '#003399'], layers: 3 },    // Light/dark blue
+    { name: 'Blue/Green', colors: ['#0066ff', '#00cc00'], layers: 3 },
+    { name: 'Blue/Yellow', colors: ['#0066ff', '#ffcc00'], layers: 3 },
+    { name: 'Blue/Cyan', colors: ['#0066ff', '#00cccc'], layers: 3 },
+    { name: 'Blue/Magenta', colors: ['#0066ff', '#cc00cc'], layers: 3 },
+    { name: 'Blue/Orange', colors: ['#0066ff', '#ff6600'], layers: 3 },
+    { name: 'Blue/Purple', colors: ['#0066ff', '#6600cc'], layers: 3 },
+    { name: 'Blue/Pink', colors: ['#0066ff', '#ff66aa'], layers: 3 },
+    { name: 'Blue/White', colors: ['#0066ff', '#ffffff'], layers: 3 },
 ];
 
 // All enemy types in order (introduced by wave)
-const ENEMY_TYPES = [...SOLID_COLORS, ...COMBO_COLORS];
+const ENEMY_TYPES = [...SOLID_COLORS, ...RED_COMBOS, ...BLUE_COMBOS];

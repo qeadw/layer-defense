@@ -87,22 +87,23 @@ class Enemy {
     }
 
     drawStriped(ctx, halfSize) {
-        const stripeCount = this.colors.length;
-        const stripeHeight = this.size / stripeCount;
+        const stripeWidth = 8; // Width of each stripe
+        const numStripes = Math.ceil(this.size * 2 / stripeWidth) + 2;
 
         ctx.save();
         ctx.beginPath();
         ctx.rect(this.x - halfSize, this.y - halfSize, this.size, this.size);
         ctx.clip();
 
-        // Draw diagonal stripes
-        for (let i = 0; i < stripeCount * 2; i++) {
-            ctx.fillStyle = this.colors[i % stripeCount];
+        // Draw diagonal stripes (45 degree angle)
+        for (let i = -numStripes; i < numStripes; i++) {
+            ctx.fillStyle = this.colors[Math.abs(i) % this.colors.length];
             ctx.beginPath();
-            const offset = (i - stripeCount) * stripeHeight;
+            const offset = i * stripeWidth;
+            // Draw parallelogram for diagonal stripe
             ctx.moveTo(this.x - halfSize + offset, this.y - halfSize);
-            ctx.lineTo(this.x - halfSize + offset + stripeHeight, this.y - halfSize);
-            ctx.lineTo(this.x + halfSize + offset + stripeHeight, this.y + halfSize);
+            ctx.lineTo(this.x - halfSize + offset + stripeWidth, this.y - halfSize);
+            ctx.lineTo(this.x + halfSize + offset + stripeWidth, this.y + halfSize);
             ctx.lineTo(this.x + halfSize + offset, this.y + halfSize);
             ctx.closePath();
             ctx.fill();
